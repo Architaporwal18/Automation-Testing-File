@@ -1,16 +1,21 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'BROWSER', choices: ['chrome'], description: 'Select Browser')
+        string(name: 'BASE_URL', defaultValue: 'https://rahulshettyacademy.com/loginpagePractise/', description: 'Application URL')
+    }
+
     tools {
-        nodejs 'NodeJS'   // Make sure NodeJS is configured in Jenkins (Manage Jenkins → Tools)
+        nodejs 'NodeJS'
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/your-username/your-repo.git'
+                echo "Checking out source code"
+                checkout scm
             }
         }
 
@@ -22,7 +27,11 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'npx wdio run wdio.conf.js'
+                bat """
+                echo Browser: %BROWSER%
+                echo URL: %BASE_URL%
+                npx wdio run wdio.conf.js
+                """
             }
         }
 
@@ -36,20 +45,10 @@ pipeline {
     post {
         always {
             allure([
-                includeProperties: false,
-                jdk: '',
-                properties: [],
                 reportBuildPolicy: 'ALWAYS',
                 results: [[path: 'allure-results']]
             ])
         }
-
-        success {
-            echo '✅ Build and tests completed successfully!'
-        }
-
-        failure {
-            echo '❌ Build or tests failed!'
-        }
     }
 }
+
