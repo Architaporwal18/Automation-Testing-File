@@ -8,10 +8,11 @@ pipeline {
             }
         }
 
-        stage('Run Tests in Container') {
+        stage('Run Tests') {
             steps {
                 bat 'docker run wdio-test'
             }
         }
     }
 }
+
